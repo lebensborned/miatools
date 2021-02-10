@@ -115,17 +115,16 @@ end
 
 function packet.DataPacket.unpack(bin)
     local packetId = utils.binToDec({unpack(bin, 1, 3)})
-    logger.debug('data packet > packet id: ' .. packetId)
+
     local sessionId = utils.binToDec({unpack(bin, 4, 7)})
-    logger.debug('data packet > session id: ' .. sessionId)
+    
     local parityBit = bin[8]
-    logger.debug('data packet > parity bit:' .. parityBit)
+ 
     local data = utils.binToDec({unpack(bin, 9, 16)})
-    logger.debug('data packet > data: ' .. inspect(data))
+    
 
     if (utils.getParity(data) and 1 or 0) ~= parityBit then
-        logger.warn('got parity bit: ' .. parityBit)
-        logger.warn('actual parity bit: ' .. (utils.getParity(data) and 1 or 0))
+       
         error('corrupted data packet: parity bits do not match')
     end
 
@@ -172,8 +171,7 @@ function packet.HandlerIdPacket.unpack(bin)
     local handlerId = utils.binToDec({unpack(bin, 9, 16)})
 
     if (utils.getParity(handlerId) and 1 or 0) ~= parityBit then
-        logger.warn('got parity bit: ' .. parityBit)
-        logger.warn('actual parity bit: ' .. (utils.getParity(handlerId) and 1 or 0))
+        
         error('corrupted handler id packet: parity bits do not match')
     end
 
