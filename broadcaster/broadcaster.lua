@@ -35,7 +35,7 @@ function EXPORTS.registerHandler(handlerId, callback, rawData)
     end
 
     handlers[handlerId] = {callback, rawData}
-    logger.info(('registered handler "%s"'):format(handlerId))
+    
 end
 
 -- Args:
@@ -45,7 +45,7 @@ end
 function EXPORTS.unregisterHandler(handlerId)
     if handlers[handlerId] ~= nil then
         handlers[handlerId] = nil
-        logger.info(('unregistered handler "%s"'):format(handlerId))
+       
         return true
     end
     return false
@@ -73,11 +73,9 @@ function EXPORTS.sendMessage(message, handlerId)
     local encodedMessage = encoder.encode(message, charset.MESSAGE_ENCODE)
     local encodedHandlerId = encoder.encode(handlerId, charset.MESSAGE_ENCODE)
 
-    logger.debug('sendMessage > encodedMessage: ' .. inspect(encodedMessage))
-    logger.debug('sendMessage > encodedHandlerId: ' .. inspect(encodedHandlerId))
+   
 
     local packets = proto.sendData(encodedMessage, encodedHandlerId)
-    logger.info('sendMessage > packets:\n  ' .. inspect(packets))
     for _, p in ipairs(packets) do
         local bs = bitsToBitStream(p)
         raknetBitStreamSetWriteOffset(bs, 16)
@@ -106,9 +104,9 @@ local function bitStreamToBits(bs)
 end
 
 local function sessionHandler(session)
-    logger.trace('>> broadcaster.lua:sessionHandler')
+   
     local handlerId = encoder.decode(session.handlerId, charset.MESSAGE_DECODE)
-    logger.debug(('got handler id: "%s"'):format(handlerId))
+    
     local handler, rawData = unpack(handlers[handlerId] or {})
     if handler ~= nil then
         if rawData then
@@ -117,7 +115,7 @@ local function sessionHandler(session)
             handler(encoder.decode(session.data, charset.MESSAGE_DECODE))
         end
     else
-        logger.warn('handler not found, all handlers:\n  ' .. inspect(handlers))
+        
     end
 end
 
@@ -126,18 +124,18 @@ local function rpcHandler(rpcId, bs)
         raknetBitStreamResetReadPointer(bs)
 
         local bits = bitStreamToBits(bs)
-        logger.info(string.rep(' ', 4) .. '[^] received bits: ' .. inspect(bits))
+        
 
         if #bits == magic.PACKETS_LEN then
             proto.processPacket(bits, sessionHandler)
         else
-            logger.warn(('bs length is not %d (%d instead)'):format(magic.PACKETS_LEN, #bits))
+            
         end
     end
 end
 
 function main()
-    logger.trace('>> broadcaster.lua:main')
+   
     addEventHandler('onReceiveRpc', rpcHandler)
     wait(-1)
 end
