@@ -83,7 +83,7 @@ function proto.processPacket(bin, callback)
                
             end
         end,
-        default = function() logger.warn('cannot identify packet') end
+        default = function() end
     })
 
     packetProcessors:case(packetCode)
